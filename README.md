@@ -1,4 +1,4 @@
-# automated_social_media
+# Automated Social Media Manager
 a picture focused social media posting app for visual businesses.
 
 ## Things you need:
@@ -17,9 +17,15 @@ a picture focused social media posting app for visual businesses.
 * inteligent text generators
 
 
+
+
+
+
+
+
+# Licence info
 ### Comercial use:
 This code is not free to use for comercial purposes. Please contact me for commercial licenceing questions.
-
 ### Modification for personal use:
 Please read and understand the Saber Public License Version 1.0 that is included with this software.
 
