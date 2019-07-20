@@ -7,28 +7,59 @@ from PIL import Image
 
 
 def get_cliche(location):
-    #TODO: gather all the post cliches and make a list of 60-80 to randomly pick from and modify.
-    cliches = []
+    cliches = ["{}\r.\r.\r", "whats your bucket list destination?", "Look how amazing {} is!", "Wish you were here!",
+               "{} is just Wow!" "{} \r.\r.\r Where is your next vacation?",
+               "Tag the friend you'd love to explore {} with!", "Have you ever seen anything like it?",
+               "Guess the place?", "Caption This!", "Have you ever fallen in love with somewhere?",
+               "Who wants to come with us on the next trip?", "Where was your most memorable vacation?",
+               "What special memory do you have about traveling?"]
+    cta = ['Become a local guide at Tourzan.com',
+           "Get your guide with us at Tourzan.com",
+           "Get off the beaten trail with Tourzan.com",
+           "Make local friends around the world with Tourzan.com",
+           "Follow us on twitter and facebookas at @tourzanhq"]
     selection = choice(cliches)
     if '{}' in selection:
-       selection = selection.format(location)
-    return selection
+        print(location['full_location'])
+        print(selection)
+        selection = selection.format(location['full_location'])
+    out = selection + '\n\n\n' + choice(cta)
+    if location['instagram'] is not None:
+        out = selection + '\n\n' + choice(cta) + "\n\nphotographer's instagram: " + '@{}'.format(location['instagram'])
+    return out
 
 
 def get_facebook_content(data):
-    return get_cliche(data['name'])
+    location = data['name']
+    content = get_cliche(location)
+    if len(data['about']) > 100:
+        content += '\n\nHere is what the photographer has to say about their photo:\n {}'.format(data['about'])
+    return content
 
 
 def get_twitter_content(data):
-    return get_cliche(data['name'])
+    return get_cliche(data)
 
 
 def get_instagram_content(data):
-    location = data['name']
-    content = get_cliche(location)
-    hashtags = ".\r.\r.\r #travel #travelphotography #travelblogger #traveling #travelgram #passionpassport #travelguide #traveltour #tour #tours #tourguide #traveler #traveltheworld #travelislife #travelingram #travelblog #travelnow #travelwithme #travelphoto #travelaroundtheworld #travelpic #travellover #travelphotos #traveldiary #travelworld #instatravel #instatraveling"
-    loc = location.strip().split(',')
-    tags = " #{} #{}".format(loc[0], loc[1])
+    content = get_cliche(data)
+    if data['about'] is not None and len(data['about']) > 10:
+        print(data['about'])
+        content += '\n\nHere is what the photographer has to say about their photo:\n {}'.format(data['about'])
+
+    hashtags = "\r.\r.\r.\r#travel #travelphotography #travelblogger #traveling #travelgram #passionpassport " \
+               "#travelguide #traveltour #tour #tours #tourguide #traveler #traveltheworld #travelislife " \
+               "#travelingram #travelblog #travelnow #travelwithme #travelphoto #travelaroundtheworld #travelpic " \
+               "#travellover #travelphotos #traveldiary #travelworld #instatravel #instatraveling"
+    loc = data['full_location'].strip().split(',')
+    try:
+        if loc:
+            tags = " #{} #{}".format("".join(loc[0].split()), "".join(loc[1].split()))
+            if len(loc) > 2:
+                tags = " #{} #{} #{}".format("".join(loc[0].split()), "".join(loc[1].split()), "".join(loc[2].split()))
+    except IndexError:
+        tags = " #{}".format("".join(data['full_location']))
+
     content += hashtags
     content += tags
     return content
@@ -105,7 +136,7 @@ def watermark(input_image, output_image_path, watermark_image_path):
     transparent = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     transparent.paste(base_image, (0, 0))
     transparent.paste(watermark, position_tr, mask=watermark)
-    transparent.show()
+    # transparent.show()
     transparent.save(output_image_path)
     return output_image_path
 
@@ -123,18 +154,21 @@ def get_image(search_term, platform=None):
         r = requests.get(url, values)
         if r.status_code == 200:
             images_data = r.json()
+            # print(images_data.keys())
             name = './images/{}.png'.format(images_data['id'])
             img_link = images_data['urls']['small']
             if values["orientation"] == 'landscape':
                 img_link = images_data['urls']['regular']
             wm = watermark(img_link, name, './watermark/tp_watermark.png')
-            print(wm, stat(name).st_size, images_data['location']['title'])
+            print(wm, stat(name).st_size, images_data['location']['title'], images_data['user']['instagram_username'], images_data['description'])
             return {'image': name,
                     'bytes': stat(name).st_size,
                     'user': images_data['user'],
-                    'instgram': images_data['user']['instagram_username'],
+                    'instagram': images_data['user']['instagram_username'],
                     'location': images_data['location'],
                     'full_location': images_data['location']['title'],
+                    'about': images_data['description'],
+                    'alt_about': images_data['alt_description'],
                     'search_term': search_term
                     }
         else:
@@ -152,6 +186,9 @@ if __name__ == "__main__":
     image1 = get_image(search1, platform='facebook')
     image2 = get_image(search2, platform='twitter')
     image3 = get_image(search3)
+    print(get_facebook_content(image1))
+    print(get_twitter_content(image1))
+    print(get_instagram_content(image1))
     #
     # post_to_social_media(image1, 'facebook')
     # post_to_social_media(image2, 'twitter')
