@@ -15,6 +15,8 @@ a picture focused social media posting app for visual businesses.
 * text overlay
 * day event driven content
 * inteligent text generators
+* multi-arm bandit testing
+* Yolo image object recognition for machine learning.
 
 
 
