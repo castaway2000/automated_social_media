@@ -3,7 +3,9 @@ a picture focused social media posting app for visual businesses.
 
 ## Things you need:
 * unsplash API key
-* hootsuite API key
+* facebook API access credentials
+* twitter Access credentials
+* instagram account.
 
 ## Things to do:
 * setup a cron job to execute the code. 
